@@ -1,5 +1,6 @@
 ---
 galaxy_info:
+  role_name: nginx
   author: Kim Hallen
   description: Basic Nginx role for learning Molecule
   company: Catalyst IT
