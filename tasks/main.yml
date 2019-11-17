@@ -1,0 +1,66 @@
+---
+- name: "main : Install nginx"
+  apt:
+    name: nginx
+    state: present
+    update_cache: true
+  become: true
+
+- name: "main : Configure nginx"
+  template:
+    src: nginx.conf.j2
+    dest: "{{ nginx_conf }}"
+    backup: true
+  notify: "handler : reload nginx"
+  become: true
+
+- name: "main : Enable default site"
+  template:
+    src: default.conf.j2
+    dest: "{{ nginx_conf_dir }}/default.conf"
+    backup: true
+    owner: "{{ nginx_user }}"
+    group: "{{ nginx_group }}"
+    mode: "640"
+  notify: "handler : reload nginx"
+  become: true
+
+- name: "main : Create web root directory"
+  file:
+    state: directory
+    path: "{{ nginx_web_root }}"
+  become: yes
+
+- name: "main : Create index.html page"
+  template:
+    src: index.html.j2
+    dest: "{{ nginx_web_root }}/index.html"
+    backup: true
+  notify: "handler : reload nginx"
+  become: true
+
+- name: "main : Add Hello, World to molecule.html"
+  lineinfile:
+    state: present
+    create: true
+    path: "{{ nginx_web_root }}/molecule.html"
+    line: "Hello, World!"
+    regexp: "^Hello"
+    insertafter: EOF
+  become: true
+
+- name: "main : Add host information to molecule.html"
+  lineinfile:
+    state: present
+    create: true
+    path: "{{ nginx_web_root }}/molecule.html"
+    line: "My hostname is: {{ inventory_hostname }}"
+    regexp: "^Hello"
+    insertafter: EOF
+  become: true
+
+- service:
+    name: nginx
+    state: started
+    enabled: true
+  become: true

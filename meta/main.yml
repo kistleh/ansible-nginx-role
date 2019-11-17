@@ -1,0 +1,21 @@
+---
+galaxy_info:
+  author: Kim Hallen
+  description: Basic Nginx role for learning Molecule
+  company: Catalyst IT
+
+  license: GPL-3.0-only
+
+  min_ansible_version: 2.7
+
+  platforms:
+    - name: Ubuntu
+      versions:
+        - xenial
+
+  galaxy_tags:
+    - development
+    - molecule
+    - nginx
+
+dependencies: []
