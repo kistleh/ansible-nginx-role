@@ -5,10 +5,10 @@ This role has been created to be used as a base for learning
 the following:
 
 * Install role using either GitHub or Ansible Galaxy
-* Initialize a new scenario and create/converge instance on Vagrant
+* Initialize a new scenario and create/converge instance on Docker
 * Update role to work on both CentOS and Ubuntu platforms
 * Verify role idempotency
-* Write Testinfra tests to confirm role tasks
+* Write Testinfra and/or Ansible tests to confirm role tasks
 * Initialize new scenario for Docker
 * Run code syntax/lint tests
 
@@ -54,7 +54,7 @@ role. Only change if you know what you're doing.
 ---
 - hosts: servers
   roles:
-    - role: telnetmaster.nginx
+    - role: kistleh.nginx
 ```
 
 ## License
@@ -63,4 +63,4 @@ role. Only change if you know what you're doing.
 
 ## Author Information
 
-Kim Hallen @ Catalyst IT, 2019
+Kim Hallen @ Catalyst IT, 2020
