@@ -7,12 +7,12 @@ galaxy_info:
 
   license: GPL-3.0-only
 
-  min_ansible_version: 2.7
+  min_ansible_version: 2.10
 
   platforms:
     - name: Ubuntu
       versions:
-        - xenial
+        - bionic
 
   galaxy_tags:
     - development
