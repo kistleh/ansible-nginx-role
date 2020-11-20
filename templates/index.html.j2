@@ -10,6 +10,6 @@
 
     <p>...this is Ansible speaking</p>
 
-    <p><i>Served by Nginx on {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }} ({{ ansible_facts['os_family'] }})</i></p>
+    <p><i>Served by Nginx on {{ ansible_facts.distribution }} {{ ansible_facts.distribution_version }} ({{ ansible_facts.os_family }})</i></p>
   </body>
 </html>
