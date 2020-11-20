@@ -1,0 +1,4 @@
+---
+nginx_epel_package: "epel-release-latest-{{ ansible_facts.distribution_major_version }}.noarch.rpm"
+nginx_group: nginx
+nginx_user: nginx

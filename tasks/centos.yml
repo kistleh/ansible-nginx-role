@@ -1,0 +1,14 @@
+---
+- name: "centos : Install EPEL"
+  ansible.builtin.yum:
+    name: "https://dl.fedoraproject.org/pub/epel/{{ nginx_epel_package }}"
+    state: present
+    disable_gpg_check: true
+  become: true
+
+- name: "centos : Install nginx"
+  ansible.builtin.yum:
+    name: nginx
+    state: present
+    update_cache: true
+  become: true

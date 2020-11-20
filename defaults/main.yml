@@ -1,4 +1,6 @@
 ---
+nginx_conf: /etc/nginx/nginx.conf
+nginx_conf_dir: /etc/nginx/conf.d
 nginx_index_title: "Hello, World"
 nginx_web_root: "/var/www"
 nginx_worker_connections: 1024

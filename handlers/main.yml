@@ -2,7 +2,6 @@
 - name: "handler : reload nginx"
   ansible.builtin.service:
     name: nginx
-    state: reloaded 
+    state: reloaded
   become: true
-  when: ansible_facts.virtualization_type != "docker" 
-
+  when: ansible_facts.virtualization_type != "docker"

@@ -1,5 +1,0 @@
----
-nginx_conf: /etc/nginx/nginx.conf
-nginx_conf_dir: /etc/nginx/conf.d
-nginx_group: www-data
-nginx_user: www-data
