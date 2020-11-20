@@ -1,0 +1,54 @@
+---
+# This is so we don't have to duplicate it for every platform
+default_platform: &platform
+  privileged: true
+  tmpfs:
+    - /run
+    - /tmp
+  volumes:
+    - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
+  command: /lib/systemd/systemd
+  tty: true
+  environment:
+    container: docker
+
+dependency:
+  name: galaxy
+
+driver:
+  name: docker
+
+# https://molecule.readthedocs.io/en/latest/configuration.html#lint
+lint: |
+  set -e
+  yamllint .
+  ansible-lint
+  flake8
+
+platforms:
+  - name: default-centos7
+    image: litmusimage/centos:7
+    published_ports:
+      - "127.0.0.1:10002:80/tcp"
+    <<: *platform
+  - name: default-centos8
+    image: litmusimage/centos:8
+    published_ports:
+      - "127.0.0.1:10003:80/tcp"
+    <<: *platform
+  - name: default-ubuntu1804
+    image: litmusimage/ubuntu:18.04
+    published_ports:
+      - "127.0.0.1:10004:80/tcp"
+    <<: *platform
+  - name: default-ubuntu2004
+    image: litmusimage/ubuntu:20.04
+    published_ports:
+      - "127.0.0.1:10005:80/tcp"
+    <<: *platform
+
+provisioner:
+  name: ansible
+
+verifier:
+  name: ansible

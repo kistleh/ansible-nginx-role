@@ -1,0 +1,128 @@
+---
+- name: molecule verify
+  hosts: all
+
+  tasks:
+    - name: "verify : Collect packages"
+      ansible.builtin.package_facts:
+
+    - name: "verify : Collect services"
+      ansible.builtin.service_facts:
+
+    - name: "verify : Stat /etc/nginx/nginx.conf"
+      ansible.builtin.stat:
+        path: /etc/nginx/nginx.conf
+      register: nginx_config
+
+    - name: "verify : Slurp /etc/nginx/nginx.conf"
+      ansible.builtin.slurp:
+        src: /etc/nginx/nginx.conf
+      register: nginx_config_content
+
+    - name: "verify : Stat /etc/nginx/conf.d/default.conf"
+      ansible.builtin.stat:
+        path: /etc/nginx/conf.d/default.conf
+      register: nginx_default
+
+    - name: "verify : Slurp /etc/nginx/conf.d/default.conf"
+      ansible.builtin.slurp:
+        src: /etc/nginx/conf.d/default.conf
+      register: nginx_default_content
+
+    - name: "verify : Check nginx package"
+      ansible.builtin.assert:
+        that: "'nginx' in ansible_facts.packages"
+        fail_msg: "nginx is not installed"
+        quiet: true
+
+    - name: "verify : Check nginx service"
+      ansible.builtin.assert:
+        that:
+          - ansible_facts.services["nginx.service"].state == "running"
+          - ansible_facts.services["nginx.service"].status == "enabled"
+        fail_msg: "nginx is not running/enabled"
+        quiet: true
+
+    - name: "verify : Check /etc/nginx/nginx.conf permissions"
+      ansible.builtin.assert:
+        that:
+          - nginx_config.stat.exists
+          - nginx_config.stat.isreg
+          - nginx_config.stat.gr_name == "root"
+          - nginx_config.stat.pw_name == "root"
+        fail_msg: "/etc/nginx/nginx.conf does not have correct permissions"
+        quiet: true
+
+    - name: "verify : Check /etc/nginx/nginx.conf content on CentOS"
+      ansible.builtin.assert:
+        that:
+          - "'user nginx;' in (nginx_config_content.content | b64decode)"
+          - "'include /usr/share/nginx/modules/*.conf;' in (nginx_config_content.content | b64decode)"
+        fail_msg: "/etc/nginx/nginx.conf is not configured correctly"
+        quiet: true
+      when: ansible_facts.distribution == "CentOS"
+
+    - name: "verify : Check /etc/nginx/nginx.conf content on Ubuntu"
+      ansible.builtin.assert:
+        that:
+          - "'user www-data;' in (nginx_config_content.content | b64decode)"
+          - "'include /etc/nginx/modules-enabled/*.conf;' in (nginx_config_content.content | b64decode)"
+        fail_msg: "/etc/nginx/nginx.conf is not configured correctly"
+        quiet: true
+      when: ansible_facts.distribution == "Ubuntu"
+
+    - name: "verify : Check /etc/nginx/conf.d/default.conf permissions"
+      ansible.builtin.assert:
+        that:
+          - nginx_default.stat.exists
+          - nginx_default.stat.isreg
+          - nginx_default.stat.mode == "0640"
+        fail_msg: "/etc/nginx/conf.d/default.conf does not have correct permissions"
+        quiet: true
+
+    - name: "verify : Check /etc/nginx/conf.d/default.conf permissions on CentOS"
+      ansible.builtin.assert:
+        that:
+          - nginx_default.stat.gr_name == "nginx"
+          - nginx_default.stat.pw_name == "nginx"
+        fail_msg: "/etc/nginx/conf.d/default.conf does not have correct permissions"
+        quiet: true
+      when: ansible_facts.distribution == "CentOS"
+
+    - name: "verify : Check /etc/nginx/conf.d/default.conf permissions on Ubuntu"
+      ansible.builtin.assert:
+        that:
+          - nginx_default.stat.gr_name == "www-data"
+          - nginx_default.stat.pw_name == "www-data"
+        fail_msg: "/etc/nginx/conf.d/default.conf does not have correct permissions"
+        quiet: true
+      when: ansible_facts.distribution == "Ubuntu"
+
+    - name: "verify : Check /etc/nginx/conf.d/default.conf content"
+      ansible.builtin.assert:
+        that: "'root /var/www;' in (nginx_default_content.content | b64decode)"
+        fail_msg: "/etc/nginx/conf.d/default.conf is not configured correctly"
+        quiet: true
+
+    - name: "verify : Make sure nginx is listening on port 80"
+      ansible.builtin.wait_for:
+        host: 127.0.0.1
+        port: 80
+        state: started
+        timeout: 10
+
+    - name: "verify : Query http://localhost:80"
+      ansible.builtin.uri:
+        url: http://localhost:80
+        return_content: true
+      register: nginx_output
+
+    - name: "verify : Validate http://localhost:80 output"
+      ansible.builtin.assert:
+        that:
+          - nginx_output.status == 200
+          - >
+            "Served by Nginx on {{ ansible_facts.distribution }} {{ ansible_facts.distribution_version }}"
+            in nginx_output.content
+        fail_msg: "nginx is not responding with OS specific information"
+        quiet: true
